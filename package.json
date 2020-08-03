@@ -1,0 +1,16 @@
+{
+  "name": "tutorial-playwright-ultrafastgrid",
+  "version": "1.0.0",
+  "description": "Playwright Applitools Visual Grid example",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --no-timeouts 'test/*.test.js'"
+  },
+  "author": "Applitools Team <team@applitools.com> (http://www.applitools.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "@applitools/eyes-playwright": "latest",
+    "mocha": "^8.1.0",
+    "playwright": "^1.2.1"
+  }
+}
