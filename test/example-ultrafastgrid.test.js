@@ -11,6 +11,7 @@ const {
     DeviceName,
     ScreenOrientation
 } = require('@applitools/eyes-playwright');
+const playwright = require('playwright')
 
 let eyes;
 
@@ -70,7 +71,7 @@ describe('playwright', function () {
         await eyes.check('Login Window', Target.window().fully());
 
         // Click the "Log in" button.
-        element(by.id("log-in")).click();
+        await page.click("#log-in");
 
         // Check the app page
         await eyes.check('App Window', Target.window().fully());
