@@ -67,6 +67,14 @@ describe('playwright', function () {
                 }
             }}
         ]);
+        await context.addCookies([
+            {
+              name: 'my_cookie',
+              value: 'my_cookie_value',
+              domain: 'my_domain',
+              path: '/',
+            },
+          ]);
         page = await context.newPage();
         page.on('response', checkResponse);
 
