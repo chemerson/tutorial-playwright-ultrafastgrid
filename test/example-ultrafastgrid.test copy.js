@@ -12,7 +12,6 @@ const {
     ScreenOrientation
 } = require('@applitools/eyes-playwright');
 const playwright = require('playwright')
-const sleep = require('sleep');
 
 let eyes;
 
@@ -21,8 +20,10 @@ describe('playwright', function () {
 
     beforeEach(async () => {
         // Initialize the playwright browser
-        browser = await playwright.chromium.launch({ headless: true })
-
+        browser = await playwright.chromium.launch()
+        const context = await browser.newContext();
+        page = await context.newPage();
+        
         // Create a runner with concurrency of 1
         runner = new VisualGridRunner(1);
 
@@ -33,7 +34,7 @@ describe('playwright', function () {
         const configuration = new Configuration();
 
         // You can get your api key from the Applitools dashboard
-        configuration.setApiKey('8pVdTA8n6joSM18VHrggfo9OHmhaFjepyAbkdrZ1NcU110')
+        configuration.setApiKey('APPLITOOLS_API_KEY')
 
         // create a new batch info instance and set it to the configuration
         configuration.setBatch(new BatchInfo('Ultrafast Batch'))
@@ -56,27 +57,24 @@ describe('playwright', function () {
 
     it('ultraFastTest', async () => {
 
-        const context = await browser.newContext( [
-            {extraHTTPHeaders: {
-                "extraHTTPHeaders": {
-                    "akamai": {
-                        "dma": "123",
-                        "region_code": "123",
-                        "zip": "10019"
-                    }
-                }
-            }}
-        ]);
-        page = await context.newPage();
-        page.on('response', checkResponse);
+        // Navigate to the url we want to test
+        // ⭐️ Note to see visual bugs, run the test using the above URL for the 1st run.
+        // but then change the above URL to https://demo.applitools.com/index_v2.html
+        // (for the 2nd run)
+        await page.goto('https://demo.applitools.com');
 
+        // Call Open on eyes to initialize a test session
         await eyes.open(page, 'Demo App', 'Ultrafast grid demo', new RectangleSize(800, 600));
-    
-        await page.goto('https://att.com');
-        
-        await lazyLoadPage(page);
 
-        await eyes.check('att.com', Target.window().fully());
+        // check the login page with fluent api, see more info here
+        // https://applitools.com/docs/topics/sdk/the-eyes-sdk-check-fluent-api.html
+        await eyes.check('Login Window', Target.window().fully());
+
+        // Click the "Log in" button.
+        await page.click("#log-in");
+
+        // Check the app page
+        await eyes.check('App Window', Target.window().fully());
 
         // Call Close on eyes to let the server know it should display the results
         await eyes.close();
@@ -95,35 +93,4 @@ describe('playwright', function () {
         console.log(results);
     });
 
-    async function checkResponse(response) {
-        if(!response.ok()) {
-            console.log("RESPONSE OK          : " + response.ok())
-            console.log("RESPONSE STATUS      : " + response.status())
-            console.log("RESPONSE URL         : " + response.url())
-        }
-    }
-
-    async function getPageHeight(page) {
-        var clientHeight = await page.evaluate("document.documentElement.clientHeight")
-        var bodyClientHeight = await page.evaluate("document.body.clientHeight")
-        var scrollHeight = await page.evaluate("document.documentElement.scrollHeight")
-        var bodyScrollHeight = await page.evaluate("document.body.scrollHeight")
-        var maxDocElementHeight = Math.max(clientHeight, scrollHeight);
-        var maxBodyHeight = Math.max(bodyClientHeight, bodyScrollHeight);
-        return Math.max(maxDocElementHeight, maxBodyHeight);
-    };
-    
-    async function lazyLoadPage(page) {
-        var height =  await page.evaluate("window.innerHeight");
-        var pageHeight = await getPageHeight(page);
-        sleep.msleep(2000);
-        for (var j = 0; j < pageHeight; j += (height - 20)) {
-            await page.evaluate("window.scrollTo( 0, " + j + ")")
-            sleep.msleep(2000);
-            pageHeight = await getPageHeight(page);
-        }
-        await page.evaluate("window.scrollTo(0, 0)");
-        sleep.msleep(2000);
-    };
-    
 });
